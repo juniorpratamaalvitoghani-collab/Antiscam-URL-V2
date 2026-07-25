@@ -115,7 +115,7 @@ extractor = URLLexicalFeatureExtractor()
 # -------------------------------------------------------------
 # 3. USER INTERFACE & DETEKSI
 # -------------------------------------------------------------
-input_url = st.text_input("Masukkan URL yang ingin diperiksa:", placeholder="Contoh: https://www.tokopedia.com/search?q=laptop")
+input_url = st.text_input("Masukkan URL yang ingin dicek:", placeholder="Contoh: https://www.tokopedia.com/search?q=laptop")
 
 if st.button("Analisis URL", type="primary"):
     if not input_url.strip():
