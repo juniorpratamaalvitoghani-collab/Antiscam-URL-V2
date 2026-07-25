@@ -1,17 +1,61 @@
-import streamlit as st
 import pandas as pd
 import joblib
 import os
 import sys
 import tldextract
+import time
+import streamlit as st
+
+st.set_page_config(page_title="AntiScam - Phishing", page_icon="🛡️", layout="centered")
+st.markdown("""
+<style>
+    /* 1. Sembunyikan Header & Element Bawaan Streamlit */
+    header, #MainMenu, .stAppDeployButton {visibility: hidden !important; display: none !important;}
+    div[data-testid="stDecoration"], div[data-testid="stStatusWidget"] {display: none !important;}
+    
+    /* 2. Kustomisasi Footer */
+    footer {
+        visibility: visible !important;
+        font-size: 0px !important;
+        text-align: center;
+        padding: 10px;
+    }
+    
+    footer::after {
+        content: "🛡️ Anti-Scam v1.0 | Powered by Machine Learning";
+        visibility: visible !important;
+        display: block;
+        font-size: 14px !important;
+        color: #9ca3af;
+        font-weight: 500;
+    }
+
+    /* 3. Replikasi Exact Background (Dark Blue + Cyan Glow Gradient) */
+    .stApp, 
+    div[data-testid="stAppViewContainer"],
+    div[data-testid="stHeader"],
+    div[data-testid="stMain"],
+    section.main {
+        background: 
+            radial-gradient(circle at 90% 10%, rgba(56, 239, 213, 0.55) 0%, transparent 45%),
+            radial-gradient(circle at 10% 85%, rgba(20, 110, 130, 0.45) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, #082132 0%, #04121d 100%) !important;
+        background-color: #04121d !important;
+        background-attachment: fixed !important;
+    }
+
+    /* 4. Tembuskan Transparansi Layer Container */
+    div[data-testid="stMainBlockContainer"],
+    div[data-testid="stVerticalBlock"] {
+        background: transparent !important;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 from src.feature_extractor import URLLexicalFeatureExtractor
 
-st.set_page_config(page_title="AntiScam - Phishing Detector", page_icon="🛡️", layout="centered")
-
-st.title("🛡️ AntiScam URL Phishing Detector")
-st.write("Sistem Deteksi Phishing Hybrid (XGBoost ML + Tranco Top Domains Auto-Whitelist)")
+st.title("🛡️ Anti-Scam URL Phishing")
 
 # -------------------------------------------------------------
 # 1. LOAD TRANCO TOP DOMAINS (AUTO-WHITELIST)
@@ -54,11 +98,11 @@ def is_whitelisted(url: str) -> tuple[bool, str]:
 # -------------------------------------------------------------
 @st.cache_resource
 def load_artifacts():
-    model_path = os.path.join('models', 'phishing_model.pkl')
-    features_path = os.path.join('models', 'feature_names.pkl')
+    model_path = os.path.join('model', 'phishing_model.pkl')
+    features_path = os.path.join('model', 'feature_names.pkl')
     
     if not os.path.exists(model_path) or not os.path.exists(features_path):
-        st.error("⚠️ File model/feature_names tidak ditemukan di folder `models/`!")
+        st.error("⚠️ File model/feature_names tidak ditemukan di folder `model/`!")
         st.stop()
         
     model = joblib.load(model_path)
@@ -75,17 +119,19 @@ input_url = st.text_input("Masukkan URL yang ingin diperiksa:", placeholder="Con
 
 if st.button("Analisis URL", type="primary"):
     if not input_url.strip():
-        st.warning("Silakan masukkan URL terlebih dahulu!")
+        st.warning("Masukkan URL!")
     else:
+        with st.spinner("Menganalisis keamanan URL..."):
+            time.sleep(1)
+            
         st.divider()
         
         # LAPIS 1: Auto-Whitelist Tranco
         is_white, matched_domain = is_whitelisted(input_url)
         
         if is_white:
-            st.markdown("**Skor Risiko Kerentanan:** :green[**0.00%**] *(Auto-Whitelist)*")
+            st.markdown("**Skor Risiko Kerentanan:** :green[**0.00%**]")
             st.success("✅ **STATUS: AMAN / TERVERIFIKASI**")
-            st.info(f"ℹ️ Domain `{matched_domain}` terdaftar dalam **Tranco Top Domains / Instansi Resmi**, sehingga dijamin aman.")
         else:
             # LAPIS 2: Predict ML XGBoost (Jika domain tidak ada di Tranco)
             raw_features = extractor.extract_features(input_url)
@@ -119,7 +165,7 @@ if st.button("Analisis URL", type="primary"):
             # Pastikan skor tetap berada pada rentang [0.0, 1.0]
             phishing_prob = max(0.0, min(1.0, phishing_prob))
 
-            # PERBAIKAN: Pengecekan status akhir di bawah ini SEKARANG SUDAH MASUK dalam blok 'else'
+            # Pengecekan status akhir
             if phishing_prob >= 0.70:
                 st.markdown(f"**Skor Risiko Kerentanan:** {phishing_prob:.2%}")
                 st.error("🚨 **STATUS: SANGAT BERBAHAYA (PHISHING)**")
