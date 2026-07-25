@@ -12,7 +12,14 @@ st.markdown("""
     /* 1. Sembunyikan Header & Element Bawaan Streamlit */
     header, #MainMenu, .stAppDeployButton {visibility: hidden !important; display: none !important;}
     div[data-testid="stDecoration"], div[data-testid="stStatusWidget"] {display: none !important;}
-    
+    /* Tambahan khusus untuk menyembunyikan 2 logo di pojok kanan bawah */
+    [data-testid="stViewerBadge"], 
+    .stAppToolbar, 
+    div[data-testid="stStatusWidget"],
+    div[data-testid="stToolbar"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
     /* 2. Kustomisasi Footer */
     footer {
         visibility: visible !important;
@@ -117,7 +124,7 @@ extractor = URLLexicalFeatureExtractor()
 # -------------------------------------------------------------
 input_url = st.text_input("Masukkan URL yang ingin dicek:", placeholder="Contoh: https://www.tokopedia.com/search?q=laptop")
 
-if st.button("Analisis URL", type="primary"):
+if st.button("Cek URL", type="primary"):
     if not input_url.strip():
         st.warning("Masukkan URL!")
     else:
