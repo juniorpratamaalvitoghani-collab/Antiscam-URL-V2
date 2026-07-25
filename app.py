@@ -12,13 +12,18 @@ st.markdown("""
     /* 1. Sembunyikan Header & Element Bawaan Streamlit */
     header, #MainMenu, .stAppDeployButton {visibility: hidden !important; display: none !important;}
     div[data-testid="stDecoration"], div[data-testid="stStatusWidget"] {display: none !important;}
-    /* Tambahan khusus untuk menyembunyikan 2 logo di pojok kanan bawah */
-    [data-testid="stViewerBadge"], 
-    .stAppToolbar, 
-    div[data-testid="stStatusWidget"],
-    div[data-testid="stToolbar"] {
+   /* Paksa hilangkan badge/tombol di pojok kanan bawah Streamlit Cloud */
+    [data-testid="stViewerBadge"],
+    .viewerBadge_container__1QSob,
+    .stAppToolbar,
+    div[class*="viewerBadge"],
+    div[class*="stStatusWidget"],
+    #GithubIcon,
+    footer + div {
         display: none !important;
         visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
     /* 2. Kustomisasi Footer */
     footer {
